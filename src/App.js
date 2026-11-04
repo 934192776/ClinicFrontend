@@ -35,7 +35,7 @@ function MainApp() {
 
     const handleLogout = () => {
         localStorage.removeItem('token');
-        navigate('/');
+        window.location.replace('/');
     };
 
     return (
