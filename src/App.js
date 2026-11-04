@@ -67,7 +67,8 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/doctor/:id" element={<DoctorSlots />} />
                 <Route path="/my-appointments" element={<MyAppointments />} />
-                <Route path="/admin-dashboard" element={<AdminDashboard />} /> {/* 👈 新增路由 */}
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="*" element={<DoctorList />} />
             </Routes>
         </Router>
     );
