@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
-import api from './api/axios'; //axios 获取用户信息
+import api from './api/axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import DoctorList from './pages/DoctorList';
@@ -10,23 +10,26 @@ import DoctorSlots from './pages/DoctorSlots';
 import MyAppointments from './pages/MyAppointments';
 import AdminDashboard from './pages/AdminDashboard';
 
-function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+function MainApp() {
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
     const [isAdmin, setIsAdmin] = useState(false);
+    const location = useLocation(); // 获取当前网址
 
-    // 页面加载时，检查用户状态
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            setIsLoggedIn(true);
-            // 去后端获取当前用户信息（看是不是 is_staff）
             api.get('current-user/')
                 .then(res => {
-                    setIsAdmin(res.data.is_staff); // 如果是管理员，设置 true
+                    setIsAdmin(res.data.is_staff);
                 })
-                .catch(err => console.log("Error fetching user", err));
+                .catch(err => {
+                    console.log("Error fetching user", err);
+                    // 如果 token 过期，直接登出
+                    localStorage.removeItem('token');
+                    setIsLoggedIn(false);
+                });
         }
-    }, []);
+    }, [location]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -34,29 +37,28 @@ function App() {
     };
 
     return (
-        <Router>
+        <>
             <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm py-3 mb-4">
                 <Container fluid className="px-5">
                     <Navbar.Brand href="/" className="fw-bold fs-4 me-5">ClinicApp</Navbar.Brand>
                     <Nav className="me-auto gap-4">
-                        <Nav.Link href="/">Doctors</Nav.Link>
+                        <Nav.Link href="/" className="text-light fw-bold fs-6">Doctors</Nav.Link>
                         {isLoggedIn && (
-                            <Nav.Link href="/my-appointments">My Appointments</Nav.Link>
+                            <Nav.Link href="/my-appointments" className="text-light fw-bold fs-6">My Appointments</Nav.Link>
                         )}
-                        {/* 👇 只有 isAdmin 为 true 时，才显示管理面板 */}
                         {isAdmin && (
-                            <Nav.Link href="/admin-dashboard" style={{ color: '#f0ad4e' }}>
-                                Admin
+                            <Nav.Link href="/admin-dashboard" className="text-warning fw-bold fs-6">
+                                Admin Dashboard
                             </Nav.Link>
                         )}
                     </Nav>
                     <Nav>
                         {isLoggedIn ? (
-                            <Nav.Link onClick={handleLogout} style={{ color: '#ff6b6b' }}>
+                            <Nav.Link onClick={handleLogout} className="text-danger fw-bold fs-6">
                                 Logout
                             </Nav.Link>
                         ) : (
-                            <Nav.Link href="/login">Login</Nav.Link>
+                            <Nav.Link href="/login" className="text-light fw-bold fs-6">Login</Nav.Link>
                         )}
                     </Nav>
                 </Container>
@@ -66,10 +68,20 @@ function App() {
                 <Route path="/" element={<DoctorList />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/doctor/:id" element={<DoctorSlots />} />
-                <Route path="/my-appointments" element={<MyAppointments />} />
-                <Route path="/admin-dashboard" element={<AdminDashboard />} />
-                <Route path="*" element={<DoctorList />} />
+
+                <Route path="/my-appointments" element={isLoggedIn ? <MyAppointments /> : <Navigate to="/login" />} />
+                <Route path="/admin-dashboard" element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />} />
+
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+        </>
+    );
+}
+
+function App() {
+    return (
+        <Router>
+            <MainApp />
         </Router>
     );
 }
