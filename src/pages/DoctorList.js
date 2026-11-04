@@ -21,7 +21,7 @@ function DoctorList() {
             setDoctors(response.data);
         } catch (error) {
             console.error("Error fetching doctors:", error);
-            alert("Failed to load doctors. Please make sure you are logged in.");
+            alert("Failed to load doctors. Status: " + (error.response?.status || error.message));
         }
     };
 

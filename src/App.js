@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import DoctorSlots from './pages/DoctorSlots';
 import MyAppointments from './pages/MyAppointments';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminAppointments from './pages/AdminAppointments';
 
 function MainApp() {
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
@@ -53,11 +54,19 @@ function MainApp() {
                             <Nav.Link onClick={() => goTo('/my-appointments')} className="text-light fw-bold fs-6">My Appointments</Nav.Link>
                         )}
 
+
                         {isAdmin && (
-                            <Nav.Link onClick={() => goTo('/admin-dashboard')} className="text-warning fw-bold fs-6">
-                                Admin Dashboard
-                            </Nav.Link>
+                            <>
+                                <Nav.Link onClick={() => goTo('/admin-dashboard')} className="text-warning fw-bold fs-6">
+                                    Admin Dashboard
+                                </Nav.Link>
+                                <Nav.Link onClick={() => goTo('/admin-appointments')} className="text-warning fw-bold fs-6">
+                                    All Bookings
+                                </Nav.Link>
+                            </>
                         )}
+
+
                     </Nav>
 
                     <Nav>
@@ -77,7 +86,7 @@ function MainApp() {
 
                 <Route path="/my-appointments" element={isLoggedIn ? <MyAppointments /> : <Navigate to="/" />} />
                 <Route path="/admin-dashboard" element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />} />
-
+                <Route path="/admin-appointments" element={isAdmin ? <AdminAppointments /> : <Navigate to="/" />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </>

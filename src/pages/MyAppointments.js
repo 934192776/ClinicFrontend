@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
-import { Container, Table, Button, Badge } from 'react-bootstrap';
+import { Container, Table, Button, Badge, Modal, ListGroup } from 'react-bootstrap';
 
 function MyAppointments() {
-    // 这里存放从后端拉取的预约数据
     const [appointments, setAppointments] = useState([]);
+    // 控制弹窗显示和数据
+    const [showModal, setShowModal] = useState(false);
+    const [selectedAppt, setSelectedAppt] = useState(null);
+    const [availableSlots, setAvailableSlots] = useState([]);
 
-    // 页面加载时自动拉取数据
     useEffect(() => {
         fetchAppointments();
     }, []);
 
     const fetchAppointments = async () => {
         try {
-            // 发送 GET 请求到 appointments 接口
-            // 后端重写了 get_queryset，这里只返回当前登录用户的预约
             const response = await api.get('appointments/');
             setAppointments(response.data);
         } catch (error) {
@@ -24,22 +24,52 @@ function MyAppointments() {
 
     // 取消预约
     const handleCancel = async (appointmentId) => {
-        // 弹出确认框，防止误点
-        if (!window.confirm("Are you sure you want to cancel this appointment?")) {
-            return;
-        }
-
+        if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
         try {
-            // 发送 POST 请求到自定义 @action(cancel)
-            // URL: /api/appointments/{id}/cancel/
             await api.post(`appointments/${appointmentId}/cancel/`);
             alert("Appointment cancelled successfully!");
-
-            // 取消成功后，重新拉取数据刷新页面
             fetchAppointments();
         } catch (error) {
             console.error("Cancel failed:", error.response?.data);
             alert("Failed to cancel appointment.");
+        }
+    };
+
+    // 点击 Edit 按钮，打开弹窗准备改时间
+    const handleEditClick = async (appt) => {
+        setSelectedAppt(appt);
+        setShowModal(true);
+        try {
+            // 去后端拉取所有可用的时间段
+            const response = await api.get('slots/');
+            // 过滤出属于同一个医生，且可用的时间段
+            const slotsForDoctor = response.data.filter(
+                slot => slot.doctor.id === appt.time_slot.doctor.id && slot.is_available
+            );
+            setAvailableSlots(slotsForDoctor);
+        } catch (error) {
+            console.error("Error fetching slots:", error);
+        }
+    };
+
+    // 确认修改（取消旧的 + 预约新的）
+    const handleConfirmEdit = async (newSlotId) => {
+        try {
+            //  取消旧预约
+            await api.post(`appointments/${selectedAppt.id}/cancel/`);
+
+            // 创建新预约
+            await api.post('appointments/', {
+                time_slot_id: newSlotId,
+                notes: selectedAppt.notes
+            });
+
+            alert("Rescheduled successfully!");
+            setShowModal(false);
+            fetchAppointments(); // 刷新列表
+        } catch (error) {
+            console.error("Reschedule failed:", error.response?.data);
+            alert("Failed to reschedule. Time slot may be taken.");
         }
     };
 
@@ -63,26 +93,24 @@ function MyAppointments() {
                     <tbody>
                         {appointments.map((appt) => (
                             <tr key={appt.id}>
-                                {/* 嵌套的序列化器就能直接拿到医生的名字 */}
                                 <td>Dr. {appt.time_slot.doctor.username}</td>
                                 <td>{appt.time_slot.date}</td>
                                 <td>{appt.time_slot.start_time}</td>
                                 <td>
-                                    {/* 根据状态显示不同的颜色标签 */}
                                     <Badge bg={appt.status === 'Booked' ? 'success' : 'danger'}>
                                         {appt.status}
                                     </Badge>
                                 </td>
                                 <td>
-                                    {/* 只有状态为 Booked 的预约，才显示取消按钮 */}
                                     {appt.status === 'Booked' && (
-                                        <Button
-                                            variant="danger"
-                                            size="sm"
-                                            onClick={() => handleCancel(appt.id)}
-                                        >
-                                            Cancel
-                                        </Button>
+                                        <>
+                                            <Button variant="warning" size="sm" className="me-2" onClick={() => handleEditClick(appt)}>
+                                                Reschedule
+                                            </Button>
+                                            <Button variant="danger" size="sm" onClick={() => handleCancel(appt.id)}>
+                                                Cancel
+                                            </Button>
+                                        </>
                                     )}
                                 </td>
                             </tr>
@@ -90,6 +118,27 @@ function MyAppointments() {
                     </tbody>
                 </Table>
             )}
+
+            {/* 修改时间的弹窗 */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Select New Time for Dr. {selectedAppt?.time_slot.doctor.username}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {availableSlots.length === 0 ? <p>No other available slots.</p> : (
+                        <ListGroup>
+                            {availableSlots.map(slot => (
+                                <ListGroup.Item key={slot.id} className="d-flex justify-content-between align-items-center">
+                                    <span>{slot.date} at {slot.start_time}</span>
+                                    <Button variant="success" size="sm" onClick={() => handleConfirmEdit(slot.id)}>
+                                        Confirm
+                                    </Button>
+                                </ListGroup.Item>
+                            ))}
+                        </ListGroup>
+                    )}
+                </Modal.Body>
+            </Modal>
         </Container>
     );
 }

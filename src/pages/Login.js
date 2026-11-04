@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Form, Button, Container, Alert } from 'react-bootstrap'; // 引入 Alert 用于显示错误
+import api from '../api/axios';
 
 function Login() {
     const [username, setUsername] = useState('');
@@ -15,7 +16,7 @@ function Login() {
 
         try {
             // 这里直接写死线上的后端完整地址
-            const response = await axios.post('https://clinicbackend-lm7o.onrender.com/api-token-auth/', {
+            const response = await api.post('api-token-auth/', {
                 username: username,
                 password: password
             });
