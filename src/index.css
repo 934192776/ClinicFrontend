@@ -1,0 +1,49 @@
+
+body {
+    background-color: #f4f6f9 !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+
+.navbar {
+    background-color: #1a365d !important;
+}
+
+
+.navbar .nav-link:hover {
+    color: #63b3ed !important;
+    text-decoration: none;
+}
+
+
+.card {
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+
+.table {
+    background-color: white !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+    margin-top: 20px;
+}
+
+.table thead th {
+    background-color: #2b6cb0 !important;
+    color: white !important;
+    border: none !important;
+    padding: 15px !important;
+}
