@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import api from './api/axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -32,33 +32,39 @@ function MainApp() {
 
     const handleLogout = () => {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        window.location.href = '/';
+    };
+
+    const goTo = (path) => {
+        window.location.href = path;
     };
 
     return (
         <>
             <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm py-3 mb-4">
                 <Container fluid className="px-5">
-                    {/* 👇 换成 as={Link} to="..." */}
-                    <Navbar.Brand as={Link} to="/" className="fw-bold fs-4 me-5">ClinicApp</Navbar.Brand>
+                    {/* 用 onClick + window.location 代替 Link */}
+                    <Navbar.Brand onClick={() => goTo('/')} className="fw-bold fs-4 me-5" style={{cursor: 'pointer'}}>ClinicApp</Navbar.Brand>
+
                     <Nav className="me-auto gap-4">
-                        <Nav.Link as={Link} to="/" className="text-light fw-bold fs-6">Doctors</Nav.Link>
+                        <Nav.Link onClick={() => goTo('/')} className="text-light fw-bold fs-6">Doctors</Nav.Link>
+
                         {isLoggedIn && (
-                            <Nav.Link as={Link} to="/my-appointments" className="text-light fw-bold fs-6">My Appointments</Nav.Link>
+                            <Nav.Link onClick={() => goTo('/my-appointments')} className="text-light fw-bold fs-6">My Appointments</Nav.Link>
                         )}
+
                         {isAdmin && (
-                            <Nav.Link as={Link} to="/admin-dashboard" className="text-warning fw-bold fs-6">
+                            <Nav.Link onClick={() => goTo('/admin-dashboard')} className="text-warning fw-bold fs-6">
                                 Admin Dashboard
                             </Nav.Link>
                         )}
                     </Nav>
+
                     <Nav>
                         {isLoggedIn ? (
-                            <Nav.Link onClick={handleLogout} className="text-danger fw-bold fs-6">
-                                Logout
-                            </Nav.Link>
+                            <Nav.Link onClick={handleLogout} className="text-danger fw-bold fs-6">Logout</Nav.Link>
                         ) : (
-                            <Nav.Link as={Link} to="/login" className="text-light fw-bold fs-6">Login</Nav.Link>
+                            <Nav.Link onClick={() => goTo('/login')} className="text-light fw-bold fs-6">Login</Nav.Link>
                         )}
                     </Nav>
                 </Container>
@@ -69,7 +75,7 @@ function MainApp() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/doctor/:id" element={<DoctorSlots />} />
 
-                <Route path="/my-appointments" element={isLoggedIn ? <MyAppointments /> : <Navigate to="/login" />} />
+                <Route path="/my-appointments" element={isLoggedIn ? <MyAppointments /> : <Navigate to="/" />} />
                 <Route path="/admin-dashboard" element={isAdmin ? <AdminDashboard /> : <Navigate to="/" />} />
 
                 <Route path="*" element={<Navigate to="/" replace />} />
