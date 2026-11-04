@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Form, Button, Container, Alert } from 'react-bootstrap'; // 额外引入 Alert 用于显示错误
+import { Form, Button, Container, Alert } from 'react-bootstrap'; // 引入 Alert 用于显示错误
 
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMsg, setErrorMsg] = useState(''); // 用来显示后端的报错
+    const [errorMsg, setErrorMsg] = useState(''); // 显示后端的报错
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
