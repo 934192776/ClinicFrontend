@@ -15,7 +15,7 @@ function Login() {
 
         try {
             // 这里直接写死线上的后端完整地址
-            const response = await axios.post('https://clinicbackend-lm7o.onrender.com/api/api-token-auth/', {
+            const response = await axios.post('https://clinicbackend-lm7o.onrender.com/api-token-auth/', {
                 username: username,
                 password: password
             });
