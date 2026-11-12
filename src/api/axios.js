@@ -3,7 +3,7 @@ import axios from 'axios';
 // 创建 axios 实例，设置后端的公共地址
 const api = axios.create({
     // 这个是为了部署到 Render 做准备）
-baseURL: process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api/',
+baseURL: process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000',
 });
 
 // 请求拦截器：每次发送请求前，自动把 Token 塞进 Header 里

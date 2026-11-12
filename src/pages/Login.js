@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Form, Button, Container, Alert } from 'react-bootstrap'; // 引入 Alert 用于显示错误
+import { useNavigate, Link } from 'react-router-dom'; // 引入 Link
+import { Form, Button, Container, Alert } from 'react-bootstrap';
 import api from '../api/axios';
+import axios from "axios";
 
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMsg, setErrorMsg] = useState(''); // 显示后端的报错
+    const [errorMsg, setErrorMsg] = useState('');
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setErrorMsg(''); // 清空旧错误
+        setErrorMsg('');
 
         try {
-            // 这里直接写死线上的后端完整地址
-            const response = await api.post('api-token-auth/', {
+            const response = await axios.post('http://127.0.0.1:8000/api-token-auth/', {
                 username: username,
                 password: password
             });
@@ -24,12 +23,11 @@ function Login() {
             localStorage.setItem('token', response.data.token);
             alert('Login successful!');
 
-            // 使用 window.location.href 确保强制跳转并刷新页面
+            // 跳转并刷新页面
             window.location.href = '/';
 
         } catch (error) {
             console.error("Login error details:", error.response?.data);
-            // 把后端的真实报错显示在页面上，方便排查
             setErrorMsg('Invalid username or password. Please try again.');
         }
     };
@@ -38,7 +36,6 @@ function Login() {
         <Container className="mt-5" style={{ maxWidth: '400px' }}>
             <h2 className="mb-4">Login</h2>
 
-            {/* 如果有错误，显示红色的提示框 */}
             {errorMsg && <Alert variant="danger">{errorMsg}</Alert>}
 
             <Form onSubmit={handleLogin}>
@@ -60,9 +57,14 @@ function Login() {
                         required
                     />
                 </Form.Group>
-                <Button variant="primary" type="submit" className="w-100">
+                <Button variant="primary" type="submit" className="w-100 mb-3">
                     Login
                 </Button>
+
+                {/* 去注册页面的链接 */}
+                <div className="text-center">
+                    <p>Don't have an account? <Link to="/register">Register here</Link></p>
+                </div>
             </Form>
         </Container>
     );

@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
-import { Container, Table, Button, Badge, Modal, ListGroup } from 'react-bootstrap';
+import { Container, Table, Button, Badge, Modal, ListGroup, Alert } from 'react-bootstrap';
 
 function MyAppointments() {
     const [appointments, setAppointments] = useState([]);
-    // 控制弹窗显示和数据
     const [showModal, setShowModal] = useState(false);
     const [selectedAppt, setSelectedAppt] = useState(null);
     const [availableSlots, setAvailableSlots] = useState([]);
+    const [errorMsg, setErrorMsg] = useState('');
+    const modalTimerRef = useRef(null);
 
     useEffect(() => {
         fetchAppointments();
@@ -22,7 +23,6 @@ function MyAppointments() {
         }
     };
 
-    // 取消预约
     const handleCancel = async (appointmentId) => {
         if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
         try {
@@ -30,19 +30,13 @@ function MyAppointments() {
             alert("Appointment cancelled successfully!");
             fetchAppointments();
         } catch (error) {
-            console.error("Cancel failed:", error.response?.data);
             alert("Failed to cancel appointment.");
         }
     };
 
-    // 点击 Edit 按钮，打开弹窗准备改时间
-    const handleEditClick = async (appt) => {
-        setSelectedAppt(appt);
-        setShowModal(true);
+    const fetchAvailableSlots = async (appt) => {
         try {
-            // 去后端拉取所有可用的时间段
             const response = await api.get('slots/');
-            // 过滤出属于同一个医生，且可用的时间段
             const slotsForDoctor = response.data.filter(
                 slot => slot.doctor.id === appt.time_slot.doctor.id && slot.is_available
             );
@@ -52,30 +46,43 @@ function MyAppointments() {
         }
     };
 
-    // 确认修改（取消旧的 + 预约新的）
-    const handleConfirmEdit = async (newSlotId) => {
-        try {
-            //  取消旧预约
-            await api.post(`appointments/${selectedAppt.id}/cancel/`);
+    const handleEditClick = (appt) => {
+        setSelectedAppt(appt);
+        setShowModal(true);
+        setErrorMsg('');
+        fetchAvailableSlots(appt);
 
-            // 创建新预约
+        if (modalTimerRef.current) clearInterval(modalTimerRef.current);
+        modalTimerRef.current = setInterval(() => fetchAvailableSlots(appt), 2000);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        if (modalTimerRef.current) clearInterval(modalTimerRef.current);
+    };
+
+    const handleConfirmEdit = async (newSlotId) => {
+        setErrorMsg('');
+        try {
+            await api.post(`appointments/${selectedAppt.id}/cancel/`);
             await api.post('appointments/', {
                 time_slot_id: newSlotId,
                 notes: selectedAppt.notes
             });
-
             alert("Rescheduled successfully!");
-            setShowModal(false);
-            fetchAppointments(); // 刷新列表
+            handleCloseModal();
+            fetchAppointments();
         } catch (error) {
-            console.error("Reschedule failed:", error.response?.data);
-            alert("Failed to reschedule. Time slot may be taken.");
+            setErrorMsg("Failed to reschedule. Time slot may be taken by someone else.");
+            handleCloseModal();
+            fetchAppointments();
         }
     };
 
     return (
         <Container className="mt-4">
-            <h2 className="mb-4">My Appointments</h2>
+            <h2 className="mb-4">My Appointments (Patient)</h2>
+            {errorMsg && <Alert variant="danger">{errorMsg}</Alert>}
 
             {appointments.length === 0 ? (
                 <p>You have no appointments yet.</p>
@@ -119,10 +126,9 @@ function MyAppointments() {
                 </Table>
             )}
 
-            {/* 修改时间的弹窗 */}
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Select New Time for Dr. {selectedAppt?.time_slot.doctor.username}</Modal.Title>
+                    <Modal.Title>Select New Time</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {availableSlots.length === 0 ? <p>No other available slots.</p> : (

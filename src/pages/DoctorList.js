@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api/axios'; // 导入我们刚才写的 axios
+import api from '../api/axios'; // 导入axios
 import { Card, Button, Container, Row, Col } from 'react-bootstrap';
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function DoctorList() {
     // 状态管理：存放从后端获取的医生数据
     const [doctors, setDoctors] = useState([]);
     const navigate = useNavigate();
+
     // 当页面加载时，自动执行获取数据
     useEffect(() => {
         fetchDoctors();
     }, []);
-
 
     const fetchDoctors = async () => {
         try {
@@ -38,9 +38,13 @@ function DoctorList() {
                                 <Card.Subtitle className="mb-2 text-muted">
                                     Specialty: {doctor.specialty}
                                 </Card.Subtitle>
-                                <Card.Text>
-                                    Phone: {doctor.phone}
-                                </Card.Text>
+
+                                {doctor.phone !== "Login to view" && (
+                                    <Card.Text>
+                                        Phone: {doctor.phone}
+                                    </Card.Text>
+                                )}
+
                                 {/* 这个按钮用来跳转预约页面 */}
                                 <Button variant="primary" onClick={() => navigate(`/doctor/${doctor.id}`)}>
                                     View Slots
