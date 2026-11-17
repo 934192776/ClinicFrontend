@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api/axios';
-import { Container, Row, Col, Form, Button, Card, Alert, Table, Badge } from 'react-bootstrap';
+import api from '../../api/axios';
+import { Row, Col, Form, Button, Card, Alert, Table, Badge } from 'react-bootstrap';
 
 function DoctorSlotsManage() {
     const [mySlots, setMySlots] = useState([]);
@@ -8,6 +8,7 @@ function DoctorSlotsManage() {
     const [errorMsg, setErrorMsg] = useState('');
     const [date, setDate] = useState('');
     const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
 
     useEffect(() => {
         fetchMySlots();
@@ -25,10 +26,12 @@ function DoctorSlotsManage() {
         setSuccessMsg('');
         setErrorMsg('');
         try {
-            await api.post('slots/', { date: date, start_time: startTime });
+
+            await api.post('slots/', { date: date, start_time: startTime, end_time: endTime });
             setSuccessMsg('Time slot created successfully!');
             setDate('');
             setStartTime('');
+            setEndTime('');
             fetchMySlots();
         } catch (error) {
             setErrorMsg('Failed to create slot. It might already exist.');
@@ -63,6 +66,10 @@ function DoctorSlotsManage() {
                                     <Form.Label>Start Time</Form.Label>
                                     <Form.Control type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
                                 </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>End Time</Form.Label>
+                                    <Form.Control type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required />
+                                </Form.Group>
                                 <Button variant="primary" type="submit">Create Slot</Button>
                             </Form>
                         </Card.Body>
@@ -74,13 +81,15 @@ function DoctorSlotsManage() {
                         <Card.Body>
                             <Table striped bordered hover responsive>
                                 <thead>
-                                    <tr><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr>
+
+                                    <tr><th>Date</th><th>Start</th><th>End</th><th>Status</th><th>Action</th></tr>
                                 </thead>
                                 <tbody>
                                     {mySlots.map(slot => (
                                         <tr key={slot.id}>
                                             <td>{slot.date}</td>
-                                            <td>{slot.start_time}</td>
+                                            <td>{slot.start_time.substring(0, 5)}</td>
+                                            <td>{slot.end_time.substring(0, 5)}</td>
                                             <td>
                                                 {slot.is_available ? <Badge bg="success">Available</Badge> : <Badge bg="secondary">Booked</Badge>}
                                             </td>

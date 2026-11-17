@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; // 引入 Link
 import { Form, Button, Container, Alert } from 'react-bootstrap';
-import api from '../api/axios';
+import api from '../../api/axios';
 import axios from "axios";
 
 function Login() {

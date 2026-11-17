@@ -42,10 +42,8 @@ function DoctorSlots() {
             fetchSlots();
         } catch (error) {
             console.error("Booking failed:", error.response?.data);
-
             if (error.response && error.response.data) {
                 const errorData = error.response.data;
-                // 提取后端返回的 JSON 错误信息
                 const realError = errorData.non_field_errors
                     ? errorData.non_field_errors[0]
                     : JSON.stringify(errorData);
@@ -53,7 +51,6 @@ function DoctorSlots() {
             } else {
                 alert("Network error. Please check if the backend is running.");
             }
-
             fetchSlots();
         }
     };
@@ -70,7 +67,8 @@ function DoctorSlots() {
                     {slots.map(slot => (
                         <ListGroup.Item key={slot.id} className="d-flex justify-content-between align-items-center py-3">
                             <span className="fs-5">
-                                <strong>Date:</strong> {slot.date} | <strong>Time:</strong> {slot.start_time}
+
+                                <strong>Date:</strong> {slot.date} | <strong>Time:</strong> {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}
                             </span>
 
                             {slot.is_available ? (

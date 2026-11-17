@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import api from '../api/axios';
+import api from '../../api/axios';
 import { Container, Table, Button, Badge, Modal, ListGroup, Alert } from 'react-bootstrap';
 
 function MyAppointments() {

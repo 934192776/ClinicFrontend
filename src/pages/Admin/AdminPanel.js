@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../api/axios'; // 带 Token 的 axios
+import api from '../../api/axios'; // 带 Token 的 axios
 import { Form, Button, Container } from 'react-bootstrap';
 
 function AdminPanel() {
