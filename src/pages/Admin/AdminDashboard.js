@@ -92,7 +92,6 @@ function AdminDashboard() {
         e.preventDefault();
         setSuccessMsg(''); setErrorMsg('');
         try {
-
             await api.post('slots/', { doctor_id: parseInt(doctorId), date, start_time: startTime, end_time: endTime });
             setSuccessMsg('Time slot created successfully!');
             setDate(''); setStartTime(''); setEndTime('');
@@ -247,7 +246,6 @@ function AdminDashboard() {
                         <Card.Body style={{ maxHeight: '350px', overflowY: 'auto' }}>
                             <Table striped bordered hover responsive size="sm">
                                 <thead>
-
                                     <tr><th>Doctor</th><th>Date</th><th>Start</th><th>End</th><th>Status</th><th>Action</th></tr>
                                 </thead>
                                 <tbody>
@@ -288,8 +286,9 @@ function AdminDashboard() {
                                             <td>{app.patient.username}</td>
                                             <td>Dr. {app.time_slot.doctor.username}</td>
                                             <td>{app.time_slot.date}</td>
-                                            <td>{app.time_slot.start_time}</td>
-                                            <td>{app.time_slot.end_time}</td>
+
+                                            <td>{app.time_slot.start_time.substring(0, 5)}</td>
+                                            <td>{app.time_slot.end_time.substring(0, 5)}</td>
                                             <td>
                                                 <Badge bg={app.status === 'Booked' ? 'success' : 'danger'}>{app.status}</Badge>
                                             </td>
@@ -337,10 +336,23 @@ function AdminDashboard() {
                 )}
             </Row>
 
-            {/* 弹窗代码保持不变，为了节省篇幅省略...你原来文件里有的 */}
+            {/* 医生弹窗 */}
             <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-                 {/* 内容不变 */}
+                <Modal.Header closeButton><Modal.Title>Edit Doctor</Modal.Title></Modal.Header>
+                <Modal.Body>
+                    {editingDoctor && (
+                        <Form onSubmit={handleUpdateDoctor}>
+                            <Form.Group className="mb-3"><Form.Label>Username</Form.Label><Form.Control type="text" value={editingDoctor.username || ''} onChange={(e) => setEditingDoctor({...editingDoctor, username: e.target.value})} /></Form.Group>
+                            <Form.Group className="mb-3"><Form.Label>Email</Form.Label><Form.Control type="email" value={editingDoctor.email || ''} onChange={(e) => setEditingDoctor({...editingDoctor, email: e.target.value})} /></Form.Group>
+                            <Form.Group className="mb-3"><Form.Label>Specialty</Form.Label><Form.Control type="text" value={editingDoctor.specialty || ''} onChange={(e) => setEditingDoctor({...editingDoctor, specialty: e.target.value})} /></Form.Group>
+                            <Form.Group className="mb-3"><Form.Label>Phone</Form.Label><Form.Control type="text" value={editingDoctor.phone || ''} onChange={(e) => setEditingDoctor({...editingDoctor, phone: e.target.value})} /></Form.Group>
+                            <Button variant="primary" type="submit" className="w-100">Save Changes</Button>
+                        </Form>
+                    )}
+                </Modal.Body>
             </Modal>
+
+            {/* 时间段弹窗 */}
             <Modal show={showSlotModal} onHide={() => setShowSlotModal(false)}>
                 <Modal.Header closeButton><Modal.Title>Edit TimeSlot</Modal.Title></Modal.Header>
                 <Modal.Body>
@@ -348,15 +360,32 @@ function AdminDashboard() {
                         <Form onSubmit={handleUpdateSlot}>
                             <Form.Group className="mb-3"><Form.Label>Date</Form.Label><Form.Control type="date" value={editingSlot.date || ''} onChange={(e) => setEditingSlot({...editingSlot, date: e.target.value})} required /></Form.Group>
                             <Form.Group className="mb-3"><Form.Label>Start Time</Form.Label><Form.Control type="time" value={editingSlot.start_time || ''} onChange={(e) => setEditingSlot({...editingSlot, start_time: e.target.value})} required /></Form.Group>
-
                             <Form.Group className="mb-3"><Form.Label>End Time</Form.Label><Form.Control type="time" value={editingSlot.end_time || ''} onChange={(e) => setEditingSlot({...editingSlot, end_time: e.target.value})} required /></Form.Group>
                             <Button variant="primary" type="submit" className="w-100">Save Changes</Button>
                         </Form>
                     )}
                 </Modal.Body>
             </Modal>
+
+            {/* 预约弹窗 */}
             <Modal show={showApptModal} onHide={() => setShowApptModal(false)}>
-                {/* 内容不变 */}
+                <Modal.Header closeButton>
+                    <Modal.Title>Reschedule for {selectedAppt?.patient.username}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {availableSlots.length === 0 ? <p>No other available slots for this doctor.</p> : (
+                        <ListGroup>
+                            {availableSlots.map(slot => (
+                                <ListGroup.Item key={slot.id} className="d-flex justify-content-between align-items-center">
+                                    <span>{slot.date} at {slot.start_time.substring(0, 5)}</span>
+                                    <Button variant="success" size="sm" onClick={() => handleConfirmEditAppt(slot.id)}>
+                                        Confirm
+                                    </Button>
+                                </ListGroup.Item>
+                            ))}
+                        </ListGroup>
+                    )}
+                </Modal.Body>
             </Modal>
         </Container>
     );
