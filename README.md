@@ -68,3 +68,133 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+Project Overview
+This is the frontend of a Clinic Appointment Booking application. It allows patients to search for available appointments, book/reschedule/cancel appointments, and view booking details. The frontend is built with React and integrates with a REST API backend.
+
+Purpose of this repository: practice project for frontend development and QA testing, including manual test case execution, API validation with Postman, and basic Playwright smoke tests.
+
+Tech Stack
+React.js
+
+JavaScript (ES6+)
+
+HTML5 / CSS3
+
+REST API integration
+
+Create React App (CRA)
+
+Git / GitHub
+
+Features
+Search available appointments
+
+Book an appointment
+
+View appointment details
+
+Reschedule / cancel appointment
+
+Form validation and error handling
+
+Loading and error states for API requests
+
+Responsive layout
+
+How to Run Locally
+Prerequisites
+Node.js (v18+ recommended)
+
+npm
+
+Steps
+bash
+# 1. Clone the repository
+git clone
+cd clinicapp/frontend
+
+# 2. Install dependencies
+npm install
+
+# 3. Start the development server
+npm start
+Open http://localhost:3000 in your browser.
+
+Environment Variables
+If the frontend needs a backend API URL, create a .env file:
+
+env
+REACT_APP_API_BASE_URL=<your-backend-api-url>
+Do not commit real credentials or secrets.
+
+Backend
+This frontend expects the backend API to be running.
+
+
+Testing & QA Practice
+This project was also used for QA practice:
+
+Wrote and executed manual test cases for booking, validation, and error states
+
+Used Postman to validate appointment-related REST API endpoints (status codes, response body, invalid input)
+
+Wrote basic Playwright smoke/E2E scripts
+
+Logged structured bug reports with steps to reproduce, expected vs actual results, severity and evidence
+
+Known Limitations
+1. no authentication/role-based access yet
+
+2. limited mobile responsiveness on some pages
+
+3. uses mock/test data; not production-ready
+
+4. no automated CI pipeline yet
+
+Task Design Example
+Task: Fix the loading and error state handling on the appointment search page.
+
+Context: When the user searches for appointments, the app shows a loading indicator while the API request is in progress. If the request fails, it shows a clear error message and allow the user to retry.
+
+Expected behavior:
+
+While the API request is in progress, a loading indicator is displayed.
+
+If the request succeeds, appointment results are displayed.
+
+If the request fails, an error message is shown.
+
+The user can retry the request and recover without refreshing the page.
+
+No console errors during any of the above states.
+
+Success criteria:
+
+All three states (loading / success / error) can be reproduced manually.
+
+Retry works and returns to success state when the API recovers.
+
+No unhandled promise rejection or console error.
+
+Layout remains responsive on desktop and mobile widths.
+
+Verification steps:
+
+Run npm start and open the appointment search page.
+
+Throttle network or mock API failure to trigger error state.
+
+Confirm loading indicator appears during request.
+
+Confirm error message appears on failure.
+
+Click retry and confirm results load when API succeeds.
+
+Check browser console for errors.
+
+
+What I Learned / What I Would Improve
+1. improve state management for loading/error states
+
+2. add automated tests with basic Playwright and run them in CI
